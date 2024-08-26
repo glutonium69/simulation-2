@@ -31,11 +31,11 @@ export default class Vector2D {
 			y: 0,
 		}
 	) {
-		const { x: headScreenX, y: headScreenY } = this._mapCoord(
+		const { x: headScreenX, y: headScreenY } = Vector2D.mapCoord(
 			this.x,
 			this.y
 		).worldToScreen();
-		const { x: originScreenX, y: originScreenY } = this._mapCoord(
+		const { x: originScreenX, y: originScreenY } = Vector2D.mapCoord(
 			this.origin.x,
 			this.origin.y
 		).worldToScreen();
@@ -84,7 +84,7 @@ export default class Vector2D {
 	 * @param y - The new y-coordinate in world coordinates.
 	 */
 	public setHead(x: number, y: number) {
-		const { x: screenX, y: screenY } = this._mapCoord(x, y).worldToScreen();
+		const { x: screenX, y: screenY } = Vector2D.mapCoord(x, y).worldToScreen();
 
 		this._head.world.x = x;
 		this._head.world.y = y;
@@ -112,7 +112,7 @@ export default class Vector2D {
 	 * @param y - The new y-coordinate in world coordinates.
 	 */
 	public setOrigin(x: number, y: number) {
-		const { x: screenX, y: screenY } = this._mapCoord(x, y).worldToScreen();
+		const { x: screenX, y: screenY } = Vector2D.mapCoord(x, y).worldToScreen();
 
 		this._origin.world.x = x;
 		this._origin.world.y = y;
@@ -127,7 +127,10 @@ export default class Vector2D {
 	 * @returns The argument in radians.
 	 */
 	public getArgument() {
-		return Math.atan2(this._head.world.y, this._head.world.x);
+		return Math.atan2(
+			this._head.world.y - this._origin.world.y,
+			this._head.world.x - this._origin.world.x
+		);
 	}
 
 	/**
@@ -143,7 +146,42 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Rotates the vector by a given angle and updates the head position accordingly.
+	 * Changes the direction of the vector and points towards a given point
+	 * 
+	 * @param x - The x coordinate in ` world coordinate system `
+	 * @param y - The y coordinate in ` world coordinate system `
+	 */
+	public lookAt(x: number, y: number) {
+		const angle = Math.atan2(
+			y - this._origin.world.y,
+			x - this._origin.world.x
+		);
+
+		const magnitude = this.getMagnitude();
+		// magnitude * Math.cos(angle) returns a local coord relative to the origin point
+		// since origin is not static we have to covert local coord to world coord
+		// we do it by adding the origins world coord to it.
+		const newX = this._origin.world.x + magnitude * Math.cos(angle);
+		const newY = this._origin.world.y + magnitude * Math.sin(angle);
+
+		this.setHead(newX, newY);
+	}
+
+	/**
+	 * Walks across the direction the vector is pointing towards.
+	 * 
+	 * @param displacement - The distance to move across the pointed direction.
+	 */
+	public walk(displacement: number) {
+		const argument = this.getArgument();
+		const stepX = displacement * Math.cos(argument);
+		const stepY = displacement * Math.sin(argument);
+		this.setHead(this._head.world.x + stepX, this._head.world.y + stepY);
+		this.setOrigin(this._origin.world.x + stepX, this._origin.world.y + stepY)
+	}
+
+	/**
+	 y Rotates the vector by a given angle and updates the head position accordingly.
 	 *
 	 * @param value - The angle to rotate the vector by, in radians.
 	 */
@@ -183,7 +221,12 @@ export default class Vector2D {
 	 *
 	 * @param {CanvasRenderingContext2D} ctx - The canvas rendering context to draw on.
 	 */
-	public draw(ctx: CanvasRenderingContext2D) {
+	public draw(ctx: CanvasRenderingContext2D, options = {
+		localAxis: false 
+	}) {
+
+		options.localAxis && this._drawLocalAxis(ctx);
+
 		ctx.beginPath();
 		ctx.arc(
 			this._origin.screen.x,
@@ -201,6 +244,24 @@ export default class Vector2D {
 		ctx.stroke();
 	}
 
+	private _drawLocalAxis(ctx: CanvasRenderingContext2D) {
+		const xLength = 100;
+		const yLength = 100;
+		ctx.lineWidth = 2;
+
+		ctx.beginPath();
+		ctx.moveTo(this._origin.screen.x - xLength / 2, this._origin.screen.y)
+		ctx.lineTo(this._origin.screen.x + xLength / 2, this._origin.screen.y)
+		ctx.strokeStyle = "yellow";
+		ctx.stroke();
+
+		ctx.beginPath();
+		ctx.moveTo(this._origin.screen.x, this._origin.screen.y - yLength / 2)
+		ctx.lineTo(this._origin.screen.x, this._origin.screen.y + yLength / 2)
+		ctx.strokeStyle = "green";
+		ctx.stroke();
+	}
+
 	/**
 	 * Maps coordinates between screen and world coordinate systems.
 	 *
@@ -212,7 +273,7 @@ export default class Vector2D {
 	 *   - `worldToScreen`: Converts world coordinates to screen coordinates.
 	 *   - `screenToWorld`: Converts screen coordinates to world coordinates.
 	 */
-	private _mapCoord(x: number, y: number) {
+	static mapCoord(x: number, y: number) {
 		return {
 			worldToScreen: () => {
 				return {
