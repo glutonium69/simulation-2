@@ -1,22 +1,5 @@
 import Vector2D from './Classes/Vector2D';
 
-const eventObject = {
-	walkSpeed: 2,
-	rotationSpeed: 5 * Math.PI / 180,
-	keysPressed: {
-		w: false,
-		s: false,
-		a: false,
-		d: false,
-		arrowUp: false,
-		arrowDown: false,
-		arrowRight: false,
-		arrowLeft: false,
-	},
-	showLocalAxis: false,
-	showWorldAxis: false,
-}
-
 const canvas = document.querySelector('#cnv') as HTMLCanvasElement;
 
 if (!canvas) {
@@ -32,145 +15,12 @@ if (!ctx) {
 	throw new Error('Canvas context not found');
 }
 
-const vec1 = new Vector2D(-innerWidth / 4, 100, {
-	x: -innerWidth / 4,
-	y: 0
-});
-
-const vec2 = new Vector2D(innerWidth / 4, 100, {
-	x: innerWidth / 4,
-	y: 0
-});
-
 function animate() {
 	ctx!.clearRect(0, 0, canvas.width, canvas.height);
 
-	eventObject.keysPressed.w && vec1.walk(eventObject.walkSpeed);
-	eventObject.keysPressed.s && vec1.walk(-eventObject.walkSpeed);
-	eventObject.keysPressed.d && vec1.rotate(-eventObject.rotationSpeed);
-	eventObject.keysPressed.a && vec1.rotate(eventObject.rotationSpeed);
+	Vector2D.drawAxis(ctx!);
 
-	eventObject.keysPressed.arrowUp && vec2.walk(eventObject.walkSpeed);
-	eventObject.keysPressed.arrowDown && vec2.walk(-eventObject.walkSpeed);
-	eventObject.keysPressed.arrowRight && vec2.rotate(-eventObject.rotationSpeed);
-	eventObject.keysPressed.arrowLeft && vec2.rotate(eventObject.rotationSpeed);
-
-	eventObject.showWorldAxis && Vector2D.drawAxis(ctx!);
-
-	vec1.draw(ctx!, { localAxis: eventObject.showLocalAxis });
-	vec2.draw(ctx!, { localAxis: eventObject.showLocalAxis });
 	requestAnimationFrame(animate);
 }
 
 animate();
-
-window.addEventListener("keydown", e => {
-
-	switch (e.key) {
-		case 'w':
-			eventObject.keysPressed.w = true;
-			break;
-
-		case 's':
-			eventObject.keysPressed.s = true;
-			break;
-	}
-
-	switch (e.key) {
-		case 'd':
-			eventObject.keysPressed.d = true;
-			break;
-
-		case 'a':
-			eventObject.keysPressed.a = true;
-			break;
-	}
-
-	switch (e.key) {
-		case 'ArrowUp':
-			eventObject.keysPressed.arrowUp = true;
-			break;
-
-		case 'ArrowDown':
-			eventObject.keysPressed.arrowDown = true;
-			break;
-	}
-
-	switch (e.key) {
-		case 'ArrowRight':
-			eventObject.keysPressed.arrowRight = true;
-			break;
-
-		case 'ArrowLeft':
-			eventObject.keysPressed.arrowLeft = true;
-			break;
-	}
-})
-
-window.addEventListener("keyup", e => {
-
-	switch (e.key) {
-		case 'w':
-			eventObject.keysPressed.w = false;
-			break;
-
-		case 's':
-			eventObject.keysPressed.s = false;
-			break;
-	}
-
-	switch (e.key) {
-		case 'd':
-			eventObject.keysPressed.d = false;
-			break;
-
-		case 'a':
-			eventObject.keysPressed.a = false;
-			break;
-	}
-
-	
-	switch (e.key) {
-		case 'ArrowUp':
-			eventObject.keysPressed.arrowUp = false;
-			break;
-
-		case 'ArrowDown':
-			eventObject.keysPressed.arrowDown = false;
-			break;
-	}
-
-	switch (e.key) {
-		case 'ArrowRight':
-			eventObject.keysPressed.arrowRight = false;
-			break;
-
-		case 'ArrowLeft':
-			eventObject.keysPressed.arrowLeft = false;
-			break;
-	}
-})
-
-const rotationInput = document.getElementById("rotation-speed")! as HTMLInputElement;
-const walkingInput = document.getElementById("moving-speed")! as HTMLInputElement;
-const localAxisInput = document.getElementById("show-local-axis")! as HTMLInputElement;
-const worldAxisInput = document.getElementById("show-world-axis")! as HTMLInputElement;
-
-rotationInput.value = Math.round(eventObject.rotationSpeed * 180 / Math.PI) + "";
-walkingInput.value = eventObject.walkSpeed + "";
-
-localAxisInput.addEventListener("input", () => {
-	eventObject.showLocalAxis = localAxisInput.checked;
-})
-
-worldAxisInput.addEventListener("input", () => {
-	eventObject.showWorldAxis = worldAxisInput.checked;
-})
-
-rotationInput.addEventListener("input", () => {
-	eventObject.rotationSpeed = rotationInput.valueAsNumber * Math.PI / 180;
-})
-
-walkingInput.addEventListener("input", () => {
-	eventObject.walkSpeed = walkingInput.valueAsNumber;
-})
