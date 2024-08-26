@@ -1,30 +1,53 @@
+import { toDeg, toRad } from "../utils";
+import Vector2D from "./Vector2D";
+
 export default class Rectangle {
-	public centerX: number;
-	public centerY: number;
-	private _rotation: number = 90;
+	private _directionalVec: Vector2D;
 
 	constructor(
 		private _ctx: CanvasRenderingContext2D,
-		public x: number,
-		public y: number,
+		private _x: number,
+		private _y: number,
 		public width: number,
 		public height: number,
 		public color: string
 	) {
-		this.centerX = this.x + this.width / 2;
-		this.centerY = this.y + this.height / 2;
+		this._directionalVec = new Vector2D(0, 100, {
+			x: this._x,
+			y: this._y,
+		});
+
+	}
+
+	public walk(value: number) {
+		this._directionalVec.walk(value);
+	}
+
+	public lookAt(x: number, y: number) {
+		this._directionalVec.lookAt(x, y);
+	}
+
+	public moveTo(x: number, y: number) {
+		this._directionalVec.moveTo(x, y);
+	}
+
+	public rotate(value: number) {
+		this._directionalVec.rotate(value);
 	}
 
 	public draw() {
-		if (!this._rotation) this._drawNormal();
-		else this._drawRotate();
+		if(toDeg(this._directionalVec.getArgument()) === 90)
+			this._drawNormal();
+		else
+			this._drawRotate();
 	}
 
 	public erase() {
-		this._ctx.clearRect(this.x, this.y, this.width, this.height);
+		this._ctx.clearRect(this._x, this._y, this.width, this.height);
 	}
 
-	private _drawNormal(x = this.x, y = this.y) {
+	private _drawNormal(rotationEnabled = false) {
+		const { x, y } = this._getTopLeftPoint(rotationEnabled);
 		this._ctx.beginPath();
 		this._ctx.fillStyle = this.color;
 		this._ctx.rect(x, y, this.width, this.height);
@@ -32,11 +55,25 @@ export default class Rectangle {
 	}
 
 	private _drawRotate() {
+		const { x: originX, y: originY } = this._directionalVec.getOrigin();
+		const { x, y } = Vector2D.mapCoord(originX, originY).worldToScreen();
 		this._ctx.save();
-		this._ctx.translate(this.centerX, this.centerY);
-		this._ctx.rotate((this._rotation * Math.PI) / 180);
-		this._drawNormal(-this.width / 2, -this.height / 2);
+		this._ctx.translate(x, y);
+		this._ctx.rotate(toRad(90) - this._directionalVec.getArgument());
+		this._drawNormal(true);
 		this._ctx.translate(0, 0);
 		this._ctx.restore();
+	}
+
+	private _getTopLeftPoint(rotationEnabled = false) {
+		if(!rotationEnabled) {
+			const { x, y } = this._directionalVec.getOrigin();
+			return Vector2D.mapCoord(x - this.width / 2, y + this.height / 2).worldToScreen();
+		}else {
+			return {
+				x: -this.width / 2,
+				y: -this.height / 2
+			}
+		}
 	}
 }
