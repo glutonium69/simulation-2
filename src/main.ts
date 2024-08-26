@@ -151,26 +151,26 @@ window.addEventListener("keyup", e => {
 	}
 })
 
-const rotationInput = document.getElementById("rotation-speed");
-const walkingInput = document.getElementById("moving-speed");
-const localAxisInput = document.getElementById("show-local-axis");
-const worldAxisInput = document.getElementById("show-world-axis");
+const rotationInput = document.getElementById("rotation-speed")! as HTMLInputElement;
+const walkingInput = document.getElementById("moving-speed")! as HTMLInputElement;
+const localAxisInput = document.getElementById("show-local-axis")! as HTMLInputElement;
+const worldAxisInput = document.getElementById("show-world-axis")! as HTMLInputElement;
 
-rotationInput.value = eventObject.rotationSpeed;
-walkingInput.value = eventObject.walkSpeed;
+rotationInput.value = Math.round(eventObject.rotationSpeed * 180 / Math.PI) + "";
+walkingInput.value = eventObject.walkSpeed + "";
 
-localAxisInput!.addEventListener("input", e => {
-	eventObject.showLocalAxis = e.target!.checked;
+localAxisInput.addEventListener("input", () => {
+	eventObject.showLocalAxis = localAxisInput.checked;
 })
 
-worldAxisInput!.addEventListener("input", e => {
-	eventObject.showWorldAxis = e.target!.checked;
+worldAxisInput.addEventListener("input", () => {
+	eventObject.showWorldAxis = worldAxisInput.checked;
 })
 
-rotationInput!.addEventListener("input", e => {
-	eventObject.rotationSpeed = Number(e.target!.value) * Math.PI / 180;
+rotationInput.addEventListener("input", () => {
+	eventObject.rotationSpeed = rotationInput.valueAsNumber * Math.PI / 180;
 })
 
-walkingInput!.addEventListener("input", e => {
-	eventObject.walkSpeed = Number(e.target!.value);
+walkingInput.addEventListener("input", () => {
+	eventObject.walkSpeed = walkingInput.valueAsNumber;
 })
