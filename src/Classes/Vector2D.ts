@@ -148,8 +148,8 @@ export default class Vector2D {
 	/**
 	 * Changes the direction of the vector and points towards a given point
 	 * 
-	 * @param x - The x coordinate in ` world coordinate system `
-	 * @param y - The y coordinate in ` world coordinate system `
+	 * @param x - The x coordinate in world coordinate.
+	 * @param y - The y coordinate in world coordinate.
 	 */
 	public lookAt(x: number, y: number) {
 		const angle = Math.atan2(
@@ -171,6 +171,23 @@ export default class Vector2D {
 		const stepY = displacement * Math.sin(argument);
 		this.setHead(this._head.world.x + stepX, this._head.world.y + stepY);
 		this.setOrigin(this._origin.world.x + stepX, this._origin.world.y + stepY)
+	}
+
+	/**
+	 * Moves the whole vector to given point while keeping the argument same.
+	 * 
+	 * @param x - The x coordinate in world coordinate.
+	 * @param y - The y coordinate in world coordinate.
+	 */
+	public moveTo(x: number, y: number) {
+		const magnitude = this.getMagnitude();
+		const argument = this.getArgument();
+
+		this.setOrigin(x, y);
+		this.setHead(
+			x + magnitude * Math.cos(argument),
+			y + magnitude * Math.sin(argument),
+		)
 	}
 
 	/**
