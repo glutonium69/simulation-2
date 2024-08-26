@@ -36,7 +36,7 @@ export default class Rectangle {
 	}
 
 	public draw() {
-		if(toDeg(this._directionalVec.getArgument()) === 90)
+		if (toDeg(this._directionalVec.getArgument()) === 90)
 			this._drawNormal();
 		else
 			this._drawRotate();
@@ -44,6 +44,34 @@ export default class Rectangle {
 
 	public erase() {
 		this._ctx.clearRect(this._x, this._y, this.width, this.height);
+	}
+
+	public isColliding(element: Rectangle | { x: number, y: number }) {
+		if (element instanceof Rectangle) return this._boxCollision(element);
+		return this._pointCollision(element.x, element.y);
+	}
+
+	private _boxCollision(element: Rectangle) {
+		const { x: thisX, y: thisY } = this._getTopLeftPoint();
+		const { x: elemX, y: elemY } = element._getTopLeftPoint();
+
+		return (
+			thisX + this.width >= elemX &&
+			elemX + element.width >= thisX &&
+			thisY + this.height >= elemY &&
+			elemY + element.height >= thisY
+		);
+	}
+
+	private _pointCollision(x: number, y: number) {
+		const { x: thisX, y: thisY } = this._getTopLeftPoint();
+
+		return (
+			x >= thisX &&
+			x <= thisX + this.width &&
+			y >= thisY &&
+			y <= thisY + this.height
+		);
 	}
 
 	private _drawNormal(rotationEnabled = false) {
@@ -66,10 +94,10 @@ export default class Rectangle {
 	}
 
 	private _getTopLeftPoint(rotationEnabled = false) {
-		if(!rotationEnabled) {
+		if (!rotationEnabled) {
 			const { x, y } = this._directionalVec.getOrigin();
 			return Vector2D.mapCoord(x - this.width / 2, y + this.height / 2).worldToScreen();
-		}else {
+		} else {
 			return {
 				x: -this.width / 2,
 				y: -this.height / 2
