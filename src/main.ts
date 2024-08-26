@@ -17,12 +17,12 @@ if (!ctx) {
 
 Vector2D.drawAxis(ctx);
 const vec = new Vector2D(100, 100);
-vec.draw(ctx, { localAxis: true });
 
 function animate() {
 	ctx!.clearRect(0, 0, canvas.width, canvas.height);
 	Vector2D.drawAxis(ctx!);
 	vec.draw(ctx!, { localAxis: true });
+	// vec.rotate(1 * Math.PI / 180)
 
 	requestAnimationFrame(animate);
 }

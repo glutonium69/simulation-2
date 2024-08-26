@@ -27,9 +27,9 @@ export default class Vector2D {
 			x: number;
 			y: number;
 		} = {
-			x: 0,
-			y: 0,
-		}
+				x: 0,
+				y: 0,
+			}
 	) {
 		const { x: headScreenX, y: headScreenY } = Vector2D.mapCoord(
 			this.x,
@@ -141,7 +141,7 @@ export default class Vector2D {
 	public getMagnitude() {
 		return Math.sqrt(
 			(this._origin.world.x - this._head.world.x) ** 2 +
-				(this._origin.world.y - this._head.world.y) ** 2
+			(this._origin.world.y - this._head.world.y) ** 2
 		);
 	}
 
@@ -157,14 +157,7 @@ export default class Vector2D {
 			x - this._origin.world.x
 		);
 
-		const magnitude = this.getMagnitude();
-		// magnitude * Math.cos(angle) returns a local coord relative to the origin point
-		// since origin is not static we have to covert local coord to world coord
-		// we do it by adding the origins world coord to it.
-		const newX = this._origin.world.x + magnitude * Math.cos(angle);
-		const newY = this._origin.world.y + magnitude * Math.sin(angle);
-
-		this.setHead(newX, newY);
+		this.rotate(angle - this.getArgument());
 	}
 
 	/**
@@ -188,8 +181,12 @@ export default class Vector2D {
 	public rotate(value: number) {
 		const newArgument = this.getArgument() + value;
 		const magnitude = this.getMagnitude();
-		const newX = magnitude * Math.cos(newArgument);
-		const newY = magnitude * Math.sin(newArgument);
+		// magnitude * Math.cos(angle) returns a local coord relative to the origin point
+		// since origin is not static we have to covert local coord to world coord
+		// we do it by adding the origins world coord to it.
+		const newX = this._origin.world.x + magnitude * Math.cos(newArgument);
+		const newY = this._origin.world.y + magnitude * Math.sin(newArgument);
+
 		this.setHead(newX, newY);
 	}
 
@@ -213,7 +210,7 @@ export default class Vector2D {
 	 * @param {CanvasRenderingContext2D} ctx - The canvas rendering context to draw on.
 	 */
 	public draw(ctx: CanvasRenderingContext2D, options = {
-		localAxis: false 
+		localAxis: false
 	}) {
 
 		options.localAxis && this._drawLocalAxis(ctx);
