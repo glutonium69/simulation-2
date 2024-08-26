@@ -208,15 +208,6 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Scales the vector by a given factor.
-	 *
-	 * @param value - The factor by which to scale the vector.
-	 */
-	public scale(value: number) {
-		this.setHead(this._head.world.x * value, this._head.world.y * value);
-	}
-
-	/**
 	 * Draws the vector on a canvas context, representing the vector from its origin to its head.
 	 *
 	 * @param {CanvasRenderingContext2D} ctx - The canvas rendering context to draw on.
