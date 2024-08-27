@@ -1,3 +1,4 @@
+import { Coord } from "../utils";
 import World from "./World";
 
 interface Coord {

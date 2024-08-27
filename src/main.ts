@@ -1,5 +1,6 @@
+import Line from './Classes/Line';
 import Rectangle from './Classes/Rectangle';
-import Vector2D from './Classes/Vector2D';
+import World from './Classes/World';
 import { toRad } from './utils';
 
 const canvas = document.querySelector('#cnv') as HTMLCanvasElement;
@@ -23,10 +24,15 @@ const rec2 = new Rectangle(ctx, 100, 0, 50, 50, "red");
 rec.lookAt(100, 0);
 rec2.lookAt(-100, 0);
 
+const line = new Line(ctx, 0, 0, 100, -100);
+
+line.color = "white";
+line.thickness = 5;
+
 function animate() {
 	ctx!.clearRect(0, 0, canvas.width, canvas.height);
 
-	Vector2D.drawAxis(ctx!);
+	World.drawWorldAxis(ctx!);
 
 	rec.walk(2);
 	rec2.walk(2);
@@ -35,9 +41,12 @@ function animate() {
 		rec.rotate(toRad(180));
 		rec2.rotate(toRad(180));
 	}
+	line.rotate(toRad(1));
+	line.walk(1);
 
 	rec.draw();
 	rec2.draw();
+	line.draw();
 
 	requestAnimationFrame(animate);
 }
