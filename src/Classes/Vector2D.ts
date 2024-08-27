@@ -133,19 +133,6 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Normalizes the vector (scales it to unit length).
-	 *
-	 * @param [self=false] - If true, normalizes the vector in place; otherwise, returns a new normalized vector.
-	 * @returns A new normalized vector if `self` is false, otherwise returns nothing.
-	 */
-	public normalise(self = false): Vector2D | void {
-		const normalX = this._head.world.x / this._magnitude;
-		const normalY = this._head.world.y / this._magnitude;
-		if (self) this._setHead(normalX, normalY);
-		else return new Vector2D(normalX, normalY);
-	}
-
-	/**
 	 * Sets a new head position for the vector and updates the corresponding screen coordinates.
 	 *
 	 * @private
