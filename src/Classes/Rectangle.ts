@@ -12,10 +12,7 @@ export default class Rectangle {
 		public height: number,
 		public color: string
 	) {
-		this._directionalVec = new Vector2D(0, 100, {
-			x: this._x,
-			y: this._y,
-		});
+		this._directionalVec = new Vector2D(this._x, this._y);
 
 	}
 
