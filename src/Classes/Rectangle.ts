@@ -1,5 +1,6 @@
 import { toDeg, toRad } from "../utils";
 import Vector2D from "./Vector2D";
+import World from "./World";
 
 export default class Rectangle {
 	private _directionalVec: Vector2D;
@@ -81,7 +82,7 @@ export default class Rectangle {
 
 	private _drawRotate() {
 		const { x: originX, y: originY } = this._directionalVec.getOrigin();
-		const { x, y } = Vector2D.mapCoord(originX, originY).worldToScreen();
+		const { x, y } = World.coodWorldToScreen(originX, originY);
 		this._ctx.save();
 		this._ctx.translate(x, y);
 		this._ctx.rotate(toRad(90) - this._directionalVec.getArgument());
@@ -93,7 +94,7 @@ export default class Rectangle {
 	private _getTopLeftPoint(rotationEnabled = false) {
 		if (!rotationEnabled) {
 			const { x, y } = this._directionalVec.getOrigin();
-			return Vector2D.mapCoord(x - this.width / 2, y + this.height / 2).worldToScreen();
+			return World.coodWorldToScreen(x - this.width / 2, y + this.height / 2);
 		} else {
 			return {
 				x: -this.width / 2,

@@ -1,3 +1,5 @@
+import World from "./World";
+
 interface Coord {
 	world: {
 		x: number;
@@ -24,15 +26,9 @@ export default class Vector2D {
 		private x: number,
 		private y: number
 	) {
-		const { x: headScreenX, y: headScreenY } = Vector2D.mapCoord(
-			0,
-			this._magnitude
-		).worldToScreen();
+		const { x: headScreenX, y: headScreenY } = World.coodWorldToScreen(0, this._magnitude);
 
-		const { x: originScreenX, y: originScreenY } = Vector2D.mapCoord(
-			this.x,
-			this.y
-		).worldToScreen();
+		const { x: originScreenX, y: originScreenY } = World.coodWorldToScreen(this.x, this.y);
 
 		// setting up head coord
 		// by default the vector will be looking across the y axis.
@@ -140,7 +136,7 @@ export default class Vector2D {
 	 * @param y - The new y-coordinate in world coordinates.
 	 */
 	private _setHead(x: number, y: number) {
-		const { x: screenX, y: screenY } = Vector2D.mapCoord(x, y).worldToScreen();
+		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
 
 		this._head.world.x = x;
 		this._head.world.y = y;
@@ -148,7 +144,6 @@ export default class Vector2D {
 		this._head.screen.x = screenX;
 		this._head.screen.y = screenY;
 	}
-
 
 	/**
 	 * Sets a new origin position for the vector and updates the corresponding screen coordinates.
@@ -158,68 +153,12 @@ export default class Vector2D {
 	 * @param y - The new y-coordinate in world coordinates.
 	 */
 	private _setOrigin(x: number, y: number) {
-		const { x: screenX, y: screenY } = Vector2D.mapCoord(x, y).worldToScreen();
+		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
 
 		this._origin.world.x = x;
 		this._origin.world.y = y;
 
 		this._origin.screen.x = screenX;
 		this._origin.screen.y = screenY;
-	}
-
-	/**
-	 * Maps coordinates between screen and world coordinate systems.
-	 *
-	 * @static
-	 * @param x - The x-coordinate in the current coordinate system.
-	 * @param y - The y-coordinate in the current coordinate system.
-	 * @returns
-	 * - An object with two methods:
-	 *   - `worldToScreen`: Converts world coordinates to screen coordinates.
-	 *   - `screenToWorld`: Converts screen coordinates to world coordinates.
-	 */
-	static mapCoord(x: number, y: number) {
-		return {
-			worldToScreen: () => {
-				return {
-					x: innerWidth / 2 + x,
-					y: innerHeight / 2 - y,
-				};
-			},
-			screenToWorld: () => {
-				return {
-					x: x - innerWidth / 2,
-					y: innerHeight / 2 - y,
-				};
-			},
-		};
-	}
-
-	/**
-	 * Draws the X and Y axes on the canvas.
-	 *
-	 * @static
-	 * @param {CanvasRenderingContext2D} ctx - The canvas rendering context to draw on.
-	 * @param [x=true] - Whether to draw the X-axis.
-	 * @param [y=true] - Whether to draw the Y-axis.
-	 */
-	static drawAxis(ctx: CanvasRenderingContext2D, x = true, y = true) {
-		ctx.lineWidth = 2;
-
-		if (x) {
-			ctx.beginPath();
-			ctx.moveTo(0, innerHeight / 2);
-			ctx.lineTo(innerWidth, innerHeight / 2);
-			ctx.strokeStyle = 'red';
-			ctx.stroke();
-		}
-
-		if (y) {
-			ctx.beginPath();
-			ctx.moveTo(innerWidth / 2, 0);
-			ctx.lineTo(innerWidth / 2, innerWidth);
-			ctx.strokeStyle = 'blue';
-			ctx.stroke();
-		}
 	}
 }
