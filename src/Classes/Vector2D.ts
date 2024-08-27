@@ -1,17 +1,6 @@
 import { Coord } from "../utils";
 import World from "./World";
 
-interface Coord {
-	world: {
-		x: number;
-		y: number;
-	};
-	screen: {
-		x: number;
-		y: number;
-	};
-}
-
 /**
  * Creates an instance of a unit `Vector2D`.
  *
