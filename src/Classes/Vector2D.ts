@@ -2,11 +2,11 @@ import { Coord } from "../utils";
 import World from "./World";
 
 /**
- * Creates an instance of a unit `Vector2D`.
- *
- * @param x - The origin-x in the world coordinate system.
- * @param y - The origin-y in the world coordinate system.
- */
+* Creates an instance of a unit `Vector2D`.
+*
+* @param x - The origin-x in the world coordinate system.
+* @param y - The origin-y in the world coordinate system.
+*/
 export default class Vector2D {
 	private _head: Coord;
 	private _origin: Coord;
@@ -35,10 +35,10 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Gets the origin position of the vector in world coordinates.
-	 *
-	 * @returns The origin position in world coordinates.
-	 */
+	* Gets the origin position of the vector in world coordinates.
+	*
+	* @returns The origin position in world coordinates.
+	*/
 	public getOrigin() {
 		return {
 			x: this._origin.world.x,
@@ -47,10 +47,10 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Calculates the argument (angle) of the vector relative to the origin.
-	 *
-	 * @returns The argument in radians.
-	 */
+	* Calculates the argument (angle) of the vector relative to the origin.
+	*
+	* @returns The argument in radians.
+	*/
 	public getArgument() {
 		return Math.atan2(
 			this._head.world.y - this._origin.world.y,
@@ -59,11 +59,11 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Changes the direction of the vector and points towards a given point
-	 * 
-	 * @param x - The x coordinate in world coordinate.
-	 * @param y - The y coordinate in world coordinate.
-	 */
+	* Changes the direction of the vector and points towards a given point
+	* 
+	* @param x - The x coordinate in world coordinate.
+	* @param y - The y coordinate in world coordinate.
+	*/
 	public lookAt(x: number, y: number) {
 		const angle = Math.atan2(
 			y - this._origin.world.y,
@@ -74,10 +74,10 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Walks across the direction the vector is pointing towards.
-	 * 
-	 * @param displacement - The distance to move across the pointed direction.
-	 */
+	* Walks across the direction the vector is pointing towards.
+	* 
+	* @param displacement - The distance to move across the pointed direction.
+	*/
 	public walk(displacement: number) {
 		const argument = this.getArgument();
 		const stepX = displacement * Math.cos(argument);
@@ -87,11 +87,11 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Moves the whole vector to given point while keeping the argument same.
-	 * 
-	 * @param x - The x coordinate in world coordinate.
-	 * @param y - The y coordinate in world coordinate.
-	 */
+	* Moves the whole vector to given point while keeping the argument same.
+	* 
+	* @param x - The x coordinate in world coordinate.
+	* @param y - The y coordinate in world coordinate.
+	*/
 	public moveTo(x: number, y: number) {
 		const argument = this.getArgument();
 
@@ -103,10 +103,10 @@ export default class Vector2D {
 	}
 
 	/**
-	 y Rotates the vector by a given angle and updates the head position accordingly.
-	 *
-	 * @param value - The angle to rotate the vector by, in radians.
-	 */
+	* Rotates the vector by a given angle and updates the head position accordingly.
+	*
+	* @param value - The angle to rotate the vector by, in radians.
+	*/
 	public rotate(value: number) {
 		const newArgument = this.getArgument() + value;
 		// magnitude * Math.cos(angle) returns a local coord relative to the origin point
@@ -119,12 +119,24 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Sets a new head position for the vector and updates the corresponding screen coordinates.
-	 *
-	 * @private
-	 * @param x - The new x-coordinate in world coordinates.
-	 * @param y - The new y-coordinate in world coordinates.
-	 */
+	* Sets an absolute rotation.
+	*
+	* @param angle - The angle to set the vector to, in radians.
+	*/
+	public setRotation(angle: number) {
+		this._setHead(
+			this._origin.world.x + this._magnitude * Math.cos(angle),
+			this._origin.world.y + this._magnitude * Math.sin(angle)
+		)
+	}
+
+	/**
+	* Sets a new head position for the vector and updates the corresponding screen coordinates.
+	*
+	* @private
+	* @param x - The new x-coordinate in world coordinates.
+	* @param y - The new y-coordinate in world coordinates.
+	*/
 	private _setHead(x: number, y: number) {
 		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
 
@@ -136,12 +148,12 @@ export default class Vector2D {
 	}
 
 	/**
-	 * Sets a new origin position for the vector and updates the corresponding screen coordinates.
-	 *
-	 * @private
-	 * @param x - The new x-coordinate in world coordinates.
-	 * @param y - The new y-coordinate in world coordinates.
-	 */
+	* Sets a new origin position for the vector and updates the corresponding screen coordinates.
+	*
+	* @private
+	* @param x - The new x-coordinate in world coordinates.
+	* @param y - The new y-coordinate in world coordinates.
+	*/
 	private _setOrigin(x: number, y: number) {
 		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
 
