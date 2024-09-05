@@ -22,8 +22,8 @@ export default class Line {
 		private x2: number,
 		private y2: number,
 	) {
-		const { x: headScreenX, y: headScreenY } = World.coodWorldToScreen(this.x1, this.y1);
-		const { x: originScreenX, y: originScreenY } = World.coodWorldToScreen(this.x2, this.y2);
+		const { x: headScreenX, y: headScreenY } = World.coordWorldToScreen(this.x1, this.y1);
+		const { x: originScreenX, y: originScreenY } = World.coordWorldToScreen(this.x2, this.y2);
 
 		// setting up head coord
 		this._tail = {
@@ -61,7 +61,7 @@ export default class Line {
 	 * @param y - The new y-coordinate in world coordinates.
 	 */
 	public setHead(x: number, y: number) {
-		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
+		const { x: screenX, y: screenY } = World.coordWorldToScreen(x, y);
 
 		this._head.world.x = x;
 		this._head.world.y = y;
@@ -89,7 +89,7 @@ export default class Line {
 	 * @param y - The new y-coordinate in world coordinates.
 	 */
 	public setTail(x: number, y: number) {
-		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
+		const { x: screenX, y: screenY } = World.coordWorldToScreen(x, y);
 
 		this._tail.world.x = x;
 		this._tail.world.y = y;

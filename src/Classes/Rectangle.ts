@@ -85,8 +85,7 @@ export default class Rectangle {
 	}
 
 	private _drawRotate() {
-		const { x: originX, y: originY } = this._directionalVec.getOrigin();
-		const { x, y } = World.coodWorldToScreen(originX, originY);
+		const { x, y } = World.coordWorldToScreen(this._directionalVec.getOrigin());
 		this._ctx.save();
 		this._ctx.translate(x, y);
 		this._ctx.rotate(toRad(90) - this._directionalVec.getArgument());
@@ -98,7 +97,7 @@ export default class Rectangle {
 	private _getTopLeftPoint(rotationEnabled = false) {
 		if (!rotationEnabled) {
 			const { x, y } = this._directionalVec.getOrigin();
-			return World.coodWorldToScreen(x - this.width / 2, y + this.height / 2);
+			return World.coordWorldToScreen(x - this.width / 2, y + this.height / 2);
 		} else {
 			return {
 				x: -this.width / 2,

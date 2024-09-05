@@ -1,4 +1,4 @@
-import { Coord } from "../utils";
+import { Coord, Vertex } from "../utils";
 import World from "./World";
 
 /**
@@ -16,9 +16,9 @@ export default class Vector2D {
 		private x: number,
 		private y: number
 	) {
-		const { x: headScreenX, y: headScreenY } = World.coodWorldToScreen(0, this._magnitude);
+		const { x: headScreenX, y: headScreenY } = World.coordWorldToScreen(0, this._magnitude);
 
-		const { x: originScreenX, y: originScreenY } = World.coodWorldToScreen(this.x, this.y);
+		const { x: originScreenX, y: originScreenY } = World.coordWorldToScreen(this.x, this.y);
 
 		// setting up head coord
 		// by default the vector will be looking across the y axis.
@@ -39,7 +39,7 @@ export default class Vector2D {
 	*
 	* @returns The origin position in world coordinates.
 	*/
-	public getOrigin() {
+	public getOrigin(): Vertex {
 		return {
 			x: this._origin.world.x,
 			y: this._origin.world.y,
@@ -138,7 +138,7 @@ export default class Vector2D {
 	* @param y - The new y-coordinate in world coordinates.
 	*/
 	private _setHead(x: number, y: number) {
-		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
+		const { x: screenX, y: screenY } = World.coordWorldToScreen(x, y);
 
 		this._head.world.x = x;
 		this._head.world.y = y;
@@ -155,7 +155,7 @@ export default class Vector2D {
 	* @param y - The new y-coordinate in world coordinates.
 	*/
 	private _setOrigin(x: number, y: number) {
-		const { x: screenX, y: screenY } = World.coodWorldToScreen(x, y);
+		const { x: screenX, y: screenY } = World.coordWorldToScreen(x, y);
 
 		this._origin.world.x = x;
 		this._origin.world.y = y;
