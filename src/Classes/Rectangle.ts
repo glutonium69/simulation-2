@@ -33,6 +33,10 @@ export default class Rectangle {
 		this._directionalVec.rotate(value);
 	}
 
+	public setRotation(angle: number) {
+		this._directionalVec.setRotation(angle);
+	}
+
 	public draw() {
 		if (toDeg(this._directionalVec.getArgument()) === 90)
 			this._drawNormal();
