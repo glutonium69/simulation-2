@@ -1,4 +1,4 @@
-import { Vertex, toRad } from "../utils";
+import { Vertex } from "../utils";
 import Vector2D from "./Vector2D";
 import World from "./World";
 
