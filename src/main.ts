@@ -30,11 +30,12 @@ const spaceShipProp = {
 	linearVelocity: 5,
 	angularVelocity: 0.05,
 	health: 100,
-	bulletsLeft: 100,
+	bulletsLeft: 50,
+	fireCooldown: 200,
 }
 
 const spaceShip = new Polygon(ctx, 3, { x: 0, y: 0 }, 50, "hsl(117, 100%, 65%)");
-const bullets = setUpBullets(100);
+const bullets = setUpBullets(50);
 const rocks = setUpRocks(5);
 
 function animate() {
@@ -42,54 +43,10 @@ function animate() {
 
 	if (spaceShipProp.health <= 0) return;
 
-	const shipPos = spaceShip.getPosition();
-	rocks.forEach((rock) => {
-		rock.lookAt(shipPos.x, shipPos.y);
-		rock.walk(rock.data.get("walkVelocity"));
-		rock.spin(rock.data.get("spinVelocity"));
-		rock.draw();
-		if (rock.isInsideCanvas()) {
-			rock.data.set("shoudlRespawn", true);
-
-			if (rock.isColliding(spaceShip)) {
-				respawnRock(rock);
-				rock.lookAt(shipPos.x, shipPos.y);
-				spaceShipProp.health -= 10;
-				spaceShip.fillColor = `hsl(${117 * spaceShipProp.health / 100}, 100%, 65%)`
-				if (spaceShipProp.health < 0) spaceShipProp.health = 0;
-			}
-		}
-		if (rock.data.get("shoudlRespawn") === true && !rock.isInsideCanvas()) {
-			respawnRock(rock);
-			rock.lookAt(shipPos.x, shipPos.y);
-		}
-	})
-
-	bullets.forEach(bul => {
-		if (bul.data.get("isLive") === true) {
-			const velocity = 10;  // Bullet velocity
-			bul.walk(velocity);
-			bul.draw();
-
-			if (!bul.isInsideCanvas()) {
-				bul.data.set("isLive", false);  // Deactivate bullet when outside canvas
-			} else {
-				rocks.forEach(rock => {
-					if (bul.isColliding(rock)) {
-						bul.data.set("isLive", false);  // Deactivate bullet when outside canvas
-						respawnRock(rock);
-					}
-				})
-			}
-		}
-	});
-
-	bulletsElem.innerHTML = "Bullets: " + spaceShipProp.bulletsLeft;
-	health.innerHTML = "Health: " + spaceShipProp.health;
-
-	handleSpaceShipControl();
-	spaceShip.draw();
-	!spaceShip.isInsideCanvas() && spaceShip.moveTo(0, 0);
+	handleRocks();
+	handleBullets();
+	updateHtmlELements();
+	handleSpaceShip();
 
 	requestAnimationFrame(animate);
 }
@@ -159,8 +116,65 @@ function respawnRock(rock: Polygon) {
 	rock.data.set("shoudlRespawn", false);
 }
 
+function handleRocks() {
+	const shipPos = spaceShip.getPosition();
+	rocks.forEach((rock) => {
+		rock.lookAt(shipPos.x, shipPos.y);
+		rock.walk(rock.data.get("walkVelocity"));
+		if (rock.isInsideCanvas()) {
+			rock.spin(rock.data.get("spinVelocity"));
+			rock.draw();
+			rock.data.set("shoudlRespawn", true);
+
+			if (rock.isColliding(spaceShip)) {
+				respawnRock(rock);
+				rock.lookAt(shipPos.x, shipPos.y);
+				spaceShipProp.health -= 10;
+				spaceShip.fillColor = `hsl(${117 * spaceShipProp.health / 100}, 100%, 65%)`
+				if (spaceShipProp.health < 0) spaceShipProp.health = 0;
+			}
+		}
+		if (rock.data.get("shoudlRespawn") === true && !rock.isInsideCanvas()) {
+			respawnRock(rock);
+			rock.lookAt(shipPos.x, shipPos.y);
+		}
+	})
+}
+
+function handleBullets() {
+	bullets.forEach(bul => {
+		if (bul.data.get("isLive") === true) {
+			const velocity = 10;  // Bullet velocity
+			bul.walk(velocity);
+			bul.draw();
+
+			if (!bul.isInsideCanvas()) {
+				bul.data.set("isLive", false);  // Deactivate bullet when outside canvas
+			} else {
+				rocks.forEach(rock => {
+					if (bul.isColliding(rock)) {
+						bul.data.set("isLive", false);  // Deactivate bullet when outside canvas
+						respawnRock(rock);
+					}
+				})
+			}
+		}
+	});
+}
+
+function handleSpaceShip() {
+	handleSpaceShipControl();
+
+	spaceShip.draw();
+	!spaceShip.isInsideCanvas() && spaceShip.moveTo(0, 0);
+}
+
+function updateHtmlELements() {
+	bulletsElem.innerHTML = "Bullets: " + spaceShipProp.bulletsLeft;
+	health.innerHTML = "Health: " + spaceShipProp.health;
+}
+
 let lastShotTime = 0;
-const fireCooldown = 200; // in milliseconds
 
 function handleSpaceShipControl() {
 	keysPressed.w && spaceShip.walk(spaceShipProp.linearVelocity);
@@ -172,7 +186,7 @@ function handleSpaceShipControl() {
 	if (keysPressed.space && spaceShipProp.bulletsLeft > 0) {
 		const currentTime = Date.now();
 		// Fire bullet every 200ms
-		if (currentTime - lastShotTime > fireCooldown) {
+		if (currentTime - lastShotTime > spaceShipProp.fireCooldown) {
 			fireBullet();
 			lastShotTime = currentTime;
 		}
@@ -180,25 +194,22 @@ function handleSpaceShipControl() {
 }
 
 function fireBullet() {
-	if (spaceShipProp.bulletsLeft === 0) return;
+	const inactiveBullet = bullets.find(bul => bul.data.get("isLive") === false);
 
-	for (let bul of bullets) {
-		if (bul.data.get("isLive") === true) continue
+	if(!inactiveBullet) return;
 
-		bul.data.set("isLive", true);
-		const shipPos = spaceShip.getPosition();
-		const shipDir = spaceShip.getDirection();
-		const halfShipWidth = spaceShip.width / 2;
+	inactiveBullet.data.set("isLive", true);
+	const shipPos = spaceShip.getPosition();
+	const shipDir = spaceShip.getDirection();
+	const halfShipWidth = spaceShip.width / 2;
 
-		bul.moveTo(
-			shipPos.x + halfShipWidth * Math.cos(shipDir),
-			shipPos.y + halfShipWidth * Math.sin(shipDir)
-		);
+	inactiveBullet.moveTo(
+		shipPos.x + halfShipWidth * Math.cos(shipDir),
+		shipPos.y + halfShipWidth * Math.sin(shipDir)
+	);
 
-		bul.setRotation(shipDir);
-		spaceShipProp.bulletsLeft--;
-		break;
-	}
+	inactiveBullet.setRotation(shipDir);
+	spaceShipProp.bulletsLeft--;
 }
 
 function handleKeyDown(event: KeyboardEvent) {

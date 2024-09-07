@@ -4,6 +4,7 @@ import World from "./World";
 
 export default class Rectangle {
 	private _directionalVec: Vector2D;
+	
 	public data = new Map();
 
 	constructor(
