@@ -2,6 +2,7 @@ import { Vertex } from "../utils";
 import Shape from "./Shape";
 
 export default class Polygon extends Shape {
+
     constructor(
         protected ctx: CanvasRenderingContext2D,
         public vertexCount: number,
@@ -10,6 +11,7 @@ export default class Polygon extends Shape {
         public fillColor: string
     ) {
         super(ctx, vertexCount, position, width, width, fillColor); // Call the constructor of Shape
+        this.setVertecies();
     }
 
     public setVertexCount(count: number) {
@@ -18,18 +20,15 @@ export default class Polygon extends Shape {
     }
 
     protected setVertecies() {
-        const { x, y } = this.directionalVec.getOrigin();
-        const argument = this.rotationalVec.getArgument();
-
         const angleIncrement = 2 * Math.PI / this.vertexCount;
         const halfWidth = this.width / 2;
         this.vertecies = new Array<Vertex>(this.vertexCount);
 
         for (let i = 0; i < this.vertexCount; i++) {
-            const angle = i * angleIncrement + argument;
+            const angle = i * angleIncrement + this.directionalVec.argument;
             this.vertecies[i] = {
-                x: x + halfWidth * Math.cos(angle),
-                y: y + halfWidth * Math.sin(angle),
+                x: this.directionalVec.x + halfWidth * Math.cos(angle),
+                y: this.directionalVec.y + halfWidth * Math.sin(angle),
             };
         }
     }

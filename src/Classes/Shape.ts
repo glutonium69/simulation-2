@@ -3,7 +3,7 @@ import Vector2D from "./Vector2D";
 import World from "./World";
 
 export default abstract class Shape {
-    protected vertecies: Vertex[];
+    public vertecies: Vertex[];
     protected directionalVec: Vector2D;
     protected rotationalVec: Vector2D = new Vector2D(0, 0);
     public data = new Map();
@@ -18,30 +18,33 @@ export default abstract class Shape {
     ) {
         this.vertecies = new Array<Vertex>(vertexCount);
         this.directionalVec = new Vector2D(this.position.x, this.position.y);
-        this.setVertecies();
     }
 
     protected abstract setVertecies(): void;
 
-    public getPosition() {
-        return this.directionalVec.getOrigin();
+    public getPosition(): Vertex {
+        return {
+            x: this.directionalVec.x,
+            y: this.directionalVec.y
+        };
     }
 
-    public getDirection() {
-        return this.directionalVec.getArgument();
+    public getRotation(): number {
+        return this.directionalVec.argument;
     }
 
-    public moveTo(x: number, y: number) {
-        this.directionalVec.moveTo(x, y);
+    public moveTo(x: number, y: number): void {
+        this.directionalVec.x = x;
+        this.directionalVec.y = y;
         this.setVertecies();
     }
 
-    public walk(displacement: number) {
+    public walk(displacement: number): void {
         this.directionalVec.walk(displacement);
         this.setVertecies();
     }
 
-    public draw() {
+    public draw(): void {
         this.ctx.beginPath();
         for (let i = 0; i < this.vertecies.length; i++) {
             const { x, y } = World.coordWorldToScreen(this.vertecies[i]);
@@ -56,29 +59,29 @@ export default abstract class Shape {
         this.ctx.fill();
     }
 
-    public lookAt(x: number, y: number) {
+    public lookAt(x: number, y: number): void {
         this.directionalVec.lookAt(x, y);
         this.setVertecies();
     }
 
-    public rotate(angle: number) {
-        this.directionalVec.rotate(angle);
-        this.rotationalVec.rotate(angle);
+    public rotate(angle: number): void {
+        this.directionalVec.argument += angle;
+        this.rotationalVec.argument += angle;
         this.setVertecies();
     }
 
-    public spin(angularVelocity: number) {
-        this.rotationalVec.rotate(angularVelocity);
+    public spin(angularVelocity: number): void {
+        this.rotationalVec.argument += angularVelocity;
         this.setVertecies();
     }
 
-    public setRotation(angle: number) {
-        this.directionalVec.setRotation(angle);
-        this.rotationalVec.setRotation(angle);
+    public setRotation(angle: number): void {
+        this.directionalVec.argument = angle;
+        this.rotationalVec.argument = angle;
         this.setVertecies();
     }
 
-    public isInsideCanvas() {
+    public isInsideCanvas(): boolean {
         const { x, y } = World.coordWorldToScreen(this._getTopLeft());
 
         return (
@@ -89,14 +92,14 @@ export default abstract class Shape {
         );
     }
 
-    public isColliding(target: Shape) {
+    public isColliding(target: Shape): boolean {
         if (this.boundingCircleCollision(target)) {
             return this.separatingAxisTheorem(target);
         }
         return false;
     }
 
-    public boundingCircleCollision(target: Shape) {
+    public boundingCircleCollision(target: Shape): boolean {
         const thisPos = this.getPosition();
         const targetPos = target.getPosition();
         const thisMaxLength = Math.max(this.width, this.height);
@@ -107,7 +110,7 @@ export default abstract class Shape {
         ) < thisMaxLength / 2 + targetMaxLength / 2;
     }
 
-    public separatingAxisTheorem(target: Shape) {
+    public separatingAxisTheorem(target: Shape): boolean {
         const allNormals = [...this._computeNormals(this.vertecies), ...this._computeNormals(target.vertecies)];
 
         for (let i = 0; i < allNormals.length; i++) {
