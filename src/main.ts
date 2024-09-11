@@ -1,4 +1,7 @@
+import CustomShape from './Classes/CustomShape';
 import Polygon from './Classes/Polygon';
+import Rectangle from './Classes/Rectangle';
+import World from './Classes/World';
 
 const canvas = document.querySelector('#cnv') as HTMLCanvasElement;
 const health = document.querySelector(".health") as HTMLDivElement;
@@ -17,7 +20,6 @@ if (!ctx) {
 	throw new Error('Canvas context not found');
 }
 
-
 const keysPressed = {
 	w: false,
 	s: false,
@@ -27,140 +29,44 @@ const keysPressed = {
 }
 
 const spaceShipProp = {
-	linearVelocity: 5,
-	angularVelocity: 0.05,
+	linearVelocity: 9,
+	angularVelocity: 0.08,
 	health: 100,
 	bulletsLeft: 50,
 	fireCooldown: 200,
 }
 
-const spaceShip = new Polygon(ctx, 3, { x: 0, y: 0 }, 50, "hsl(117, 100%, 65%)");
-const bullets = setUpBullets(50);
-const rocks = setUpRocks(5);
+const spaceShip = new CustomShape(ctx, { x: 0, y: 0 }, [
+	{ x: 0, y: 150 },
+	{ x: -30, y: 0 },
+	{ x: 0, y: -50 },
+	{ x: 30, y: 0 },
+], "wheat");
+
+const customShape = new CustomShape(ctx, { x: 200, y: 100 }, [
+	{ x: 0, y: 120 },
+	{ x: -20, y: 100 },
+	{ x: -30, y: 0 },
+	{ x: 0, y: -50 },
+	{ x: 50, y: 0 },
+	{ x: 70, y: 150 },
+], "gray");
 
 function animate() {
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-	if (spaceShipProp.health <= 0) return;
-
-	handleRocks();
-	handleBullets();
-	updateHtmlELements();
 	handleSpaceShip();
+	customShape.draw();
+	customShape.spin(0.02);
+	spaceShip.fillColor = spaceShip.isColliding(customShape) ? "red" : "wheat";
 
 	requestAnimationFrame(animate);
 }
 
 animate()
 
-
 window.addEventListener("keydown", handleKeyDown);
 window.addEventListener("keyup", handleKeyUp);
-
-function setUpRocks(amount: number) {
-
-	const rocksConfig = {
-		vertexCount: {
-			min: 4,
-			max: 8
-		},
-		spinVelocity: {
-			min: 0.01,
-			max: 0.1
-		},
-		walkVelocity: {
-			min: 1,
-			max: 3
-		},
-		width: {
-			min: 25,
-			max: 40
-		}
-	}
-
-	const rocks = new Array<Polygon>(amount);
-
-	for (let i = 0; i < rocks.length; i++) {
-		const width = rand(rocksConfig.width.min, rocksConfig.width.max);
-
-		rocks[i] = new Polygon(
-			ctx,
-			rand(rocksConfig.vertexCount.min, rocksConfig.vertexCount.max, true),
-			generateRandSpawnPoint(width),
-			width,
-			"gray"
-		)
-
-		rocks[i].data.set("shoudlRespawn", false);
-		rocks[i].data.set("spinVelocity", rand(rocksConfig.spinVelocity.min, rocksConfig.spinVelocity.max));
-		rocks[i].data.set("walkVelocity", rand(rocksConfig.walkVelocity.min, rocksConfig.walkVelocity.max));
-	}
-
-	return rocks;
-}
-
-function setUpBullets(amount: number) {
-	const bullets = new Array<Polygon>(amount);
-
-	for (let i = 0; i < bullets.length; i++) {
-		bullets[i] = new Polygon(ctx, 3, { x: 0, y: 0 }, 10, "yellow");
-		bullets[i].data.set("isLive", false);
-	}
-
-	return bullets;
-}
-
-function respawnRock(rock: Polygon) {
-	const respawnPos = generateRandSpawnPoint(rock.width);
-	rock.moveTo(respawnPos.x, respawnPos.y);
-	rock.data.set("shoudlRespawn", false);
-}
-
-function handleRocks() {
-	const shipPos = spaceShip.getPosition();
-	rocks.forEach((rock) => {
-		rock.lookAt(shipPos.x, shipPos.y);
-		rock.walk(rock.data.get("walkVelocity"));
-		if (rock.isInsideCanvas()) {
-			rock.spin(rock.data.get("spinVelocity"));
-			rock.draw();
-			rock.data.set("shoudlRespawn", true);
-
-			if (rock.isColliding(spaceShip)) {
-				respawnRock(rock);
-				rock.lookAt(shipPos.x, shipPos.y);
-				spaceShipProp.health -= 10;
-				spaceShip.fillColor = `hsl(${117 * spaceShipProp.health / 100}, 100%, 65%)`
-				if (spaceShipProp.health < 0) spaceShipProp.health = 0;
-			}
-		}
-		if (rock.data.get("shoudlRespawn") === true && !rock.isInsideCanvas()) {
-			respawnRock(rock);
-			rock.lookAt(shipPos.x, shipPos.y);
-		}
-	})
-}
-
-function handleBullets() {
-	bullets.forEach(bul => {
-		if (bul.data.get("isLive") === true) {
-			const velocity = 10;  // Bullet velocity
-			bul.walk(velocity);
-			bul.draw();
-
-			if (!bul.isInsideCanvas()) {
-				bul.data.set("isLive", false);  // Deactivate bullet when outside canvas
-			} else {
-				rocks.forEach(rock => {
-					if (bul.isColliding(rock)) {
-						bul.data.set("isLive", false);  // Deactivate bullet when outside canvas
-						respawnRock(rock);
-					}
-				})
-			}
-		}
-	});
-}
 
 function handleSpaceShip() {
 	handleSpaceShipControl();
@@ -169,47 +75,11 @@ function handleSpaceShip() {
 	!spaceShip.isInsideCanvas() && spaceShip.moveTo(0, 0);
 }
 
-function updateHtmlELements() {
-	bulletsElem.innerHTML = "Bullets: " + spaceShipProp.bulletsLeft;
-	health.innerHTML = "Health: " + spaceShipProp.health;
-}
-
-let lastShotTime = 0;
-
 function handleSpaceShipControl() {
 	keysPressed.w && spaceShip.walk(spaceShipProp.linearVelocity);
 	keysPressed.s && spaceShip.walk(-spaceShipProp.linearVelocity);
 	keysPressed.d && spaceShip.rotate(-spaceShipProp.angularVelocity);
 	keysPressed.a && spaceShip.rotate(spaceShipProp.angularVelocity);
-
-	// Check if spacebar is pressed and bullets are available
-	if (keysPressed.space && spaceShipProp.bulletsLeft > 0) {
-		const currentTime = Date.now();
-		// Fire bullet every 200ms
-		if (currentTime - lastShotTime > spaceShipProp.fireCooldown) {
-			fireBullet();
-			lastShotTime = currentTime;
-		}
-	}
-}
-
-function fireBullet() {
-	const inactiveBullet = bullets.find(bul => bul.data.get("isLive") === false);
-
-	if(!inactiveBullet) return;
-
-	inactiveBullet.data.set("isLive", true);
-	const shipPos = spaceShip.getPosition();
-	const shipDir = spaceShip.getDirection();
-	const halfShipWidth = spaceShip.width / 2;
-
-	inactiveBullet.moveTo(
-		shipPos.x + halfShipWidth * Math.cos(shipDir),
-		shipPos.y + halfShipWidth * Math.sin(shipDir)
-	);
-
-	inactiveBullet.setRotation(shipDir);
-	spaceShipProp.bulletsLeft--;
 }
 
 function handleKeyDown(event: KeyboardEvent) {
@@ -262,37 +132,4 @@ function handleKeyUp(event: KeyboardEvent) {
 			keysPressed.space = false;
 			break;
 	}
-}
-
-function generateRandSpawnPoint(width: number) {
-	const side = Math.floor(Math.random() * 4); // Randomly pick one of the 4 sides
-	let x = 0, y = 0;
-	const halfHeight = innerHeight / 2;
-	const halfWidth = innerWidth / 2;
-
-	switch (side) {
-		case 0: // Left side (spawns on the left outside the world boundary)
-			x = -halfWidth - width - rand(0, 100);
-			y = rand(-halfHeight - 100, halfHeight + 100); // Random y position
-			break;
-		case 1: // Right side (spawns on the right outside the world boundary)
-			x = halfWidth + rand(0, 100);
-			y = rand(-halfHeight - 100, halfHeight + 100);
-			break;
-		case 2: // Top side (spawns on the top outside the world boundary)
-			x = rand(-halfWidth - 100, halfWidth + 100); // Random x position
-			y = -halfHeight - width - rand(0, 100);
-			break;
-		case 3: // Bottom side (spawns on the bottom outside the world boundary)
-			x = rand(-halfWidth - 100, halfWidth + 100);
-			y = halfHeight + rand(0, 100);
-			break;
-	}
-
-	return { x, y };
-}
-
-function rand(min: number, max: number, floor = false) {
-	const num = Math.random() * (max - min) + min;
-	return floor ? Math.floor(num) : num;
 }
